@@ -16,13 +16,15 @@ def home():
 @app.route('/analyze', methods=['POST'])
 def analyze():
     try:
-        data = request.get_json()
-        profile_url = data.get('profileUrl', '').strip()
+        data = request.get_json() or {}
+        # Check all possible keys the frontend might be sending
+        profile_url = data.get('profileUrl') or data.get('url') or data.get('profile_url') or ''
+        profile_url = str(profile_url).strip()
         
         if not profile_url:
             return jsonify({'error': 'Please provide a valid LinkedIn profile URL or details.'}), 400
 
-        # The updated prompt that makes Gemini act as an expert profile auditor
+        # The prompt that makes Gemini act as an expert profile auditor
         prompt = f"""
         You are an expert LinkedIn profile optimization consultant and career coach. 
         The user has provided the following LinkedIn profile link or identifier: {profile_url}.
