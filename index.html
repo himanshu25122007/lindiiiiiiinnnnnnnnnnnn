@@ -68,6 +68,19 @@
         /* Markdown formatting styles */
        #result h1, #result h2, #result h3 { color: #00838f; margin-top: 20px; }
 #result ul { padding-left: 20px; }
+
+/* --- THE FIX IS HERE --- */
+#result pre, #result code {
+    white-space: pre-wrap;       /* Allows the text to wrap to the next line */
+    word-wrap: break-word;       /* Standard way to break long words */
+    overflow-wrap: break-word;   /* A secondary break method */
+    background-color: #f0fbfc;   /* Adds a nice background to the template */
+    padding: 12px;
+    border-radius: 6px;
+    font-family: inherit;        
+    display: block;
+}
+/* ---------------------- */
     </style>
     <!-- Include Marked.js to render the AI's markdown properly -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
