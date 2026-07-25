@@ -15,10 +15,18 @@ def home():
 @app.route('/analyze', methods=['POST'])
 def analyze():
     try:
-        data = request.get_json() or {}
-        # Check all possible keys the frontend might be sending
-        profile_url = data.get('profileUrl') or data.get('url') or data.get('profile_url') or ''
-        profile_url = str(profile_url).strip()
+        # 1. Force Flask to parse JSON even if the frontend forgot the correct headers
+        data = request.get_json(force=True, silent=True) or {}
+        
+        # 2. Check all possible JSON keys
+        profile_url = data.get('profileUrl') or data.get('url') or data.get('profile_url')
+        
+        # 3. If still empty, check if the frontend sent it as standard Form Data instead
+        if not profile_url:
+            profile_url = request.form.get('profileUrl') or request.form.get('url') or request.form.get('profile_url')
+            
+        # Clean up the final result
+        profile_url = str(profile_url or '').strip()
         
         if not profile_url:
             return jsonify({'error': 'Please provide a valid LinkedIn profile URL or details.'}), 400
