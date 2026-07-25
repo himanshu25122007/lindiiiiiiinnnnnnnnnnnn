@@ -1,52 +1,90 @@
-
 import os
+import json
 from flask import Flask, request, jsonify, render_template
-from google import genai
+import google.generativeai as genai
 
-# The template_folder='.' tells Vercel to find index.html in the main directory
-app = Flask(__name__, template_folder='.')
+app = Flask(__name__)
 
-# Initialize the Gemini client pulling your API key from Vercel's environment variables
-client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+# Read the API key from the environment variable set in Vercel's dashboard
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
-@app.route('/')
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+
+MODEL_NAME = "gemini-2.5-flash"
+
+ANALYSIS_PROMPT = """
+You are an expert LinkedIn profile coach and technical recruiter with 15+ years of experience helping professionals land roles at top companies.
+
+Analyze the following LinkedIn profile text and return a structured, actionable review. 
+Format your response in Markdown using EXACTLY these section headings (as H2, using ##):
+
+## Overall Impression
+A short paragraph (4-6 sentences) summarizing the profile's overall quality, positioning, and the general impression it gives to a recruiter.
+
+## Key Strengths
+3-5 bullet points, each starting with a **bolded short label** followed by a colon and a 1-2 sentence explanation.
+
+## Areas for Improvement
+3-5 bullet points, each starting with a **bolded short label** followed by a colon and a 1-2 sentence explanation of what's weak and why it matters.
+
+## Actionable Suggestions
+3-5 concrete, specific rewrite suggestions or additions the person can make immediately (e.g. rewritten bullet lines, headline suggestions, keywords to add).
+
+Do not include any text before "## Overall Impression" or after the last section. Do not wrap the whole response in a code block.
+
+Here is the LinkedIn profile text to analyze:
+---
+{profile_text}
+---
+"""
+
+
+@app.route("/")
 def home():
-    return render_template('index.html')
+    return render_template("index.html")
 
-@app.route('/analyze', methods=['POST'])
+
+@app.route("/api/analyze", methods=["POST"])
 def analyze():
+    if not GEMINI_API_KEY:
+        return jsonify({"error": "Server is missing GEMINI_API_KEY environment variable."}), 500
+
+    data = request.get_json(silent=True) or {}
+    profile_text = (data.get("profile_text") or "").strip()
+
+    if not profile_text:
+        return jsonify({"error": "No profile text was provided."}), 400
+
+    if len(profile_text) < 30:
+        return jsonify({"error": "Please paste more profile content (About, Experience, Skills, etc.)."}), 400
+
     try:
-        data = request.get_json() or {}
-        # Check all possible keys the frontend might be sending
-        profile_url = data.get('profileUrl') or data.get('url') or data.get('profile_url') or ''
-        profile_url = str(profile_url).strip()
-        
-        if not profile_url:
-            return jsonify({'error': 'Please provide a valid LinkedIn profile URL or details.'}), 400
+        model = genai.GenerativeModel(MODEL_NAME)
+        prompt = ANALYSIS_PROMPT.format(profile_text=profile_text)
 
-        # The prompt that makes Gemini act as an expert profile auditor
-        prompt = f"""
-        You are an expert LinkedIn profile optimization consultant and career coach. 
-        The user has provided the following LinkedIn profile link or identifier: {profile_url}.
-        
-        Provide a professional, actionable LinkedIn profile audit framework. Since you cannot live-scrape the full private page directly, analyze the username/structure provided and give a top-tier blueprint covering:
-        1. **Headline Optimization**: How to structure a high-converting 220-character headline.
-        2. **About Section**: A compelling storytelling template.
-        3. **Experience**: How to frame bullet points using action verbs and metrics.
-        4. **URL Customization & SEO**: Tips on making the profile clean and recruiter-friendly.
-        
-        Format your response cleanly using Markdown headings, bold text, and bullet points.
-        """
-
-        response = client.models.generate_content(
-            model='gemini-2.5-pro',
-            contents=prompt
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
+                temperature=0.4,
+                max_output_tokens=2048,
+            ),
         )
 
-        return jsonify({'analysis': response.text})
+        result_text = getattr(response, "text", None)
+
+        if not result_text:
+            # Handle cases where the model returned no text (e.g. safety block)
+            return jsonify({"error": "The AI did not return any analysis. Try shortening or rephrasing the profile text."}), 502
+
+        return jsonify({"analysis": result_text})
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        # Log the real error to Vercel's function logs, but keep the client message generic
+        print(f"Gemini API error: {e}")
+        return jsonify({"error": f"Something went wrong while analyzing: {str(e)}"}), 500
 
-if __name__ == '__main__':
+
+# Needed so Vercel's Python runtime can detect and run this Flask app
+if __name__ == "__main__":
     app.run(debug=True)
