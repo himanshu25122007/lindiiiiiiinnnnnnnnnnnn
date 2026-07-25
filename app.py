@@ -48,16 +48,4 @@ def analyze():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)ening or rephrasing the profile text."}), 502
-
-        return jsonify({"analysis": result_text})
-
-    except Exception as e:
-        # Log the real error to Vercel's function logs, but keep the client message generic
-        print(f"Gemini API error: {e}")
-        return jsonify({"error": f"Something went wrong while analyzing: {str(e)}"}), 500
-
-
-# Needed so Vercel's Python runtime can detect and run this Flask app
-if __name__ == "__main__":
     app.run(debug=True)
