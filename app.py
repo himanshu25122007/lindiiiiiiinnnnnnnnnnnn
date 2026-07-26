@@ -1,9 +1,11 @@
 import os
 from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 from google import genai
 
 # The template_folder='.' tells Vercel to find index.html in the main directory
 app = Flask(__name__, template_folder='.')
+CORS(app)
 
 # Initialize the Gemini client pulling your API key from Vercel's environment variables
 client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
