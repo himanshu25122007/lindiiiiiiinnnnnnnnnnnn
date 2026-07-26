@@ -19,6 +19,7 @@ def analyze():
     try:
         # 1. Force Flask to parse JSON even if the frontend forgot the correct headers
         data = request.get_json(force=True, silent=True) or {}
+        job_description = data.get('jobDescription', 'No specific job description provided.')
         
         # 2. Check all possible JSON keys
         profile_url = data.get('profileUrl') or data.get('url') or data.get('profile_url')
