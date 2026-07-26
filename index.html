@@ -101,6 +101,9 @@
 
         <!-- Notice the id="urlInput" -->
         <textarea id="urlInput" placeholder="Paste LinkedIn profile URL here..."></textarea>
+        <br><br>
+<textarea id="jobInput" rows="5" placeholder="Paste the target job description here..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-family: inherit; margin-bottom: 20px;"></textarea>
+        
         
         <!-- Notice the onclick attribute and id="analyzeBtn" -->
         <button onclick="analyzeProfile()" id="analyzeBtn">Analyze Profile</button>
@@ -112,6 +115,7 @@
     <script>
         async function analyzeProfile() {
             const urlInput = document.getElementById('urlInput').value.trim();
+            const jobInput = document.getElementById("jobInput").value.trim();
             const resultDiv = document.getElementById('result');
             const analyzeBtn = document.getElementById('analyzeBtn');
 
@@ -135,7 +139,10 @@
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ profileUrl: urlInput })
+                   body: JSON.stringify({ 
+    profileUrl: urlInput, 
+    jobDescription: jobInput 
+})
                 });
 
                 const data = await response.json();
