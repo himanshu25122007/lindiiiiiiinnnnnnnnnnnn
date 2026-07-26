@@ -43,7 +43,14 @@ def analyze():
         4. **URL Customization & SEO**: Tips on making the profile clean and recruiter-friendly.
         
         Format your response cleanly using Markdown headings, bold text, and bullet points.
-        """
+        Finally, you MUST include a visual breakdown of their skills at the very bottom of your analysis. Create a Mermaid.js pie chart showing the distribution of their top 5 skills. Wrap the code exactly like this:
+
+    ```mermaid
+    pie title Top Skills
+    "Skill 1" : 40
+    "Skill 2" : 30
+    ```
+    """
 
         response = client.models.generate_content(
             model='gemini-3.5-flash',
@@ -57,3 +64,4 @@ def analyze():
 
 if __name__ == '__main__':
     app.run(debug=True)
+    
