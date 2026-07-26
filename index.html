@@ -144,7 +144,7 @@
 } else {
     resultDiv.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
 }
-          } catch (error) {
+        } catch (error) {
     console.error("The real frontend crash is:", error);
     resultDiv.innerHTML = `<span style="color:red; font-weight:bold;">Frontend Crash: Check the DevTools Console for the real error.</span>`;
 } finally {
@@ -152,7 +152,8 @@
     analyzeBtn.innerText = "Analyze Profile";
     analyzeBtn.disabled = false;
 }
-        }
+}
+        
     </script>
 </body>
 </html>
