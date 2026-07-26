@@ -132,12 +132,18 @@
 
                 const data = await response.json();
 
-                if (response.ok) {
-                    // Use marked.parse to turn Gemini's **bold** and ### headings into real HTML formatting
-                    resultDiv.innerHTML = marked.parse(data.analysis);
-                } else {
-                    resultDiv.innerHTML = `<span style="color:red; font-weight:bold;">Error: ${data.error}</span>`;
-                }
+               if (response.ok) {
+    // 1. Format the AI text into HTML
+    resultDiv.innerHTML = marked.parse(data.analysis);
+    
+    // 2. Initialize and render Mermaid charts!
+    mermaid.initialize({ startOnLoad: false, theme: 'base' });
+    setTimeout(() => {
+        mermaid.run({ querySelector: '.language-mermaid' });
+    }, 100);
+} else {
+    resultDiv.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+}
             } catch (error) {
                 resultDiv.innerHTML = `<span style="color:red; font-weight:bold;">Network Error: Could not connect to the server. Make sure Vercel finished deploying.</span>`;
             } finally {
