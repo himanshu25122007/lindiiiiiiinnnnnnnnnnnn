@@ -144,13 +144,14 @@
 } else {
     resultDiv.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
 }
-            } catch (error) {
-                resultDiv.innerHTML = `<span style="color:red; font-weight:bold;">Network Error: Could not connect to the server. Make sure Vercel finished deploying.</span>`;
-            } finally {
-                // Reset button state
-                analyzeBtn.innerText = "Analyze Profile";
-                analyzeBtn.disabled = false;
-            }
+          } catch (error) {
+    console.error("The real frontend crash is:", error);
+    resultDiv.innerHTML = `<span style="color:red; font-weight:bold;">Frontend Crash: Check the DevTools Console for the real error.</span>`;
+} finally {
+    // Reset button state
+    analyzeBtn.innerText = "Analyze Profile";
+    analyzeBtn.disabled = false;
+}
         }
     </script>
 </body>
